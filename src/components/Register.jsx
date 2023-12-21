@@ -1,13 +1,21 @@
+import axios from "axios";
+import { ErrorMessage, Field, Form, Formik } from "formik";
 import React from "react";
 import * as Yup from "yup";
+import { Aaxios } from "../axios/axios";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
+const REGISTER_URL = "/api/authaccount/registration";
 const RegisterSchema = Yup.object().shape({
-  username: Yup.string().required("Required"),
+  name: Yup.string().required("Required"),
   email: Yup.string().required("Required"),
-  username: Yup.string().required("Required"),
-
-  email:
+  password: Yup.string().required("Required"),
+  confirmPassword: Yup.string()
+    .required("Required")
+    .oneOf([Yup.ref("password"), null], "Passwords must match"),
 });
+
 const Register = () => {
   return (
     <>
@@ -19,63 +27,135 @@ const Register = () => {
           </p>
         </div>
 
-        <div className="bg-white p-8 rounded shadow-md max-w-md">
-          <form onSubmit={""}>
-            <div className="mb-4">
-              <label
-                htmlFor="username"
-                className="block text-gray-600 text-sm font-semibold mb-2"
-              >
-                Username
-              </label>
-              <input
-                type="text"
-                id="username"
-                name="username"
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:border-blue-500"
-                required
-              />
-            </div>
-
-            <div className="mb-4">
-              <label
-                htmlFor="email"
-                className="block text-gray-600 text-sm font-semibold mb-2"
-              >
-                Email
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:border-blue-500"
-                required
-              />
-            </div>
-
-            <div className="mb-4">
-              <label
-                htmlFor="password"
-                className="block text-gray-600 text-sm font-semibold mb-2"
-              >
-                Password
-              </label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:border-blue-500"
-                required
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="w-full bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-600 focus:outline-none focus:shadow-outline-blue"
-            >
-              Register
-            </button>
-          </form>
+        <div className="bg-white p-8 rounded shadow-md w-[600px]">
+          <Formik
+            initialValues={{
+              name: "",
+              email: "",
+              password: "",
+              confirmPassword: "",
+            }}
+            validationSchema={RegisterSchema}
+            onSubmit={async (values) => {
+              try {
+                const response = await Aaxios.post(REGISTER_URL, {
+                  name: values.name,
+                  email: values.email,
+                  password: values.password,
+                });
+                if (response.data.message === "success") {
+                  toast("Registeration Successful", {
+                    position: "top-right",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light",
+                  });
+                }
+              } catch (exception) {
+                toast(` Exception:${exception.message}`, {
+                  position: "top-right",
+                  autoClose: 5000,
+                  hideProgressBar: false,
+                  closeOnClick: true,
+                  pauseOnHover: true,
+                  draggable: true,
+                  progress: undefined,
+                  theme: "light",
+                });
+              }
+            }}
+          >
+            {() => (
+              <Form>
+                <div className="mb-4">
+                  <label
+                    htmlFor="name"
+                    className="block text-gray-600 text-sm font-semibold mb-2"
+                  >
+                    Name
+                  </label>
+                  <Field
+                    type="text"
+                    id="name"
+                    name="name"
+                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:border-blue-500"
+                  />
+                  <ErrorMessage
+                    component="span"
+                    name="name"
+                    className="text-red-500"
+                  />
+                </div>
+                <div className="mb-4">
+                  <label
+                    htmlFor="email"
+                    className="block text-gray-600 text-sm font-semibold mb-2"
+                  >
+                    Email
+                  </label>
+                  <Field
+                    type="email"
+                    id="email"
+                    name="email"
+                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:border-blue-500"
+                  />
+                  <ErrorMessage
+                    component="span"
+                    name="email"
+                    className="text-red-500"
+                  />
+                </div>
+                <div className="mb-4">
+                  <label
+                    htmlFor="password"
+                    className="block text-gray-600 text-sm font-semibold mb-2"
+                  >
+                    Password
+                  </label>
+                  <Field
+                    type="password"
+                    id="password"
+                    name="password"
+                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:border-blue-500"
+                  />
+                  <ErrorMessage
+                    component="span"
+                    name="password"
+                    className="text-red-500"
+                  />
+                </div>
+                <div className="mb-4">
+                  <label
+                    htmlFor="confirmPassword"
+                    className="block text-gray-600 text-sm font-semibold mb-2"
+                  >
+                    Confirm Password
+                  </label>
+                  <Field
+                    type="password"
+                    id="password"
+                    name="confirmPassword"
+                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:border-blue-500"
+                  />
+                  <ErrorMessage
+                    component="span"
+                    name="confirmPassword"
+                    className="text-red-500"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="w-full bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-600 focus:outline-none focus:shadow-outline-blue"
+                >
+                  Register
+                </button>
+              </Form>
+            )}
+          </Formik>
         </div>
       </div>
     </>

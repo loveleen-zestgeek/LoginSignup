@@ -1,7 +1,9 @@
 import { ErrorMessage, Field, Form, Formik } from "formik";
 import React from "react";
 import * as Yup from "yup";
-
+import { Aaxios } from "../axios/axios";
+import { toast } from "react-toastify";
+const LOGIN_URL = "/api/authaccount/login";
 const LoginSchema = Yup.object().shape({
   email: Yup.string().required("Required"),
   password: Yup.string().required("Required"),
@@ -17,14 +19,54 @@ const Login = () => {
           </p>
         </div>
 
-        <div className="bg-white p-8 rounded shadow-md max-w-md mt-4">
+        <div className="bg-white p-8 rounded shadow-md w-[600px] mt-4">
           <Formik
             initialValues={{
               email: "",
               password: "",
             }}
             validationSchema={LoginSchema}
-            onSubmit={(values) => console.log(values)}
+            onSubmit={async (values) => {
+              try {
+                const response = await Aaxios.post(LOGIN_URL, {
+                  name: values.name,
+                  email: values.email,
+                  password: values.password,
+                });
+
+                if (response.data.message === "success") {
+                  toast("Registeration Successful", {
+                    position: "top-right",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light",
+                  });
+
+                  localStorage.setItem("token", response.data.data.Token);
+
+                  let token = localStorage.getItem("token");
+                  console.log(
+                    "🚀 ~ file: Login.jsx:52 ~ onSubmit={ ~ token:",
+                    token
+                  );
+                }
+              } catch (exception) {
+                toast(` Exception:${exception.message}`, {
+                  position: "top-right",
+                  autoClose: 5000,
+                  hideProgressBar: false,
+                  closeOnClick: true,
+                  pauseOnHover: true,
+                  draggable: true,
+                  progress: undefined,
+                  theme: "light",
+                });
+              }
+            }}
           >
             {() => (
               <Form>
